@@ -139,12 +139,12 @@
             <div class="bg-white p-5 rounded-3xl border border-emerald-100 shadow-lg space-y-4 mb-6">
                 <h3 class="font-bold text-emerald-950 text-base mb-2 border-b pb-2">📋 بيانات العميل لتوصيل الطلب</h3>
                 <div>
-                    <label class="block text-xs font-bold text-emerald-900 mb-1">الاسم الكامل <span class="text-red-500">*</span></label>
-                    <input type="text" id="cust-name" placeholder="اكتب اسمك الثلاثي" class="w-full p-3 border border-emerald-200 rounded-xl focus:ring-2 focus:ring-emerald-500 text-sm">
+                    <label class="block text-xs font-bold text-emerald-900 mb-1">الاسم الكامل (ثلاثي على الأقل) <span class="text-red-500">*</span></label>
+                    <input type="text" id="cust-name" placeholder="اكتب اسمك الثلاثي بالكامل" class="w-full p-3 border border-emerald-200 rounded-xl focus:ring-2 focus:ring-emerald-500 text-sm">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-emerald-900 mb-1">رقم التليفون (11 رقم) <span class="text-red-500">*</span></label>
-                    <input type="tel" id="cust-phone" placeholder="يبدأ بـ 01..." class="w-full p-3 border border-emerald-200 rounded-xl focus:ring-2 focus:ring-emerald-500 text-sm" dir="ltr">
+                    <label class="block text-xs font-bold text-emerald-900 mb-1">رقم التليفون (11 رقم يبدأ بـ 01) <span class="text-red-500">*</span></label>
+                    <input type="tel" id="cust-phone" placeholder="مثال: 01xxxxxxxxx" class="w-full p-3 border border-emerald-200 rounded-xl focus:ring-2 focus:ring-emerald-500 text-sm" dir="ltr">
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-emerald-900 mb-1">العنوان بالتفصيل <span class="text-red-500">*</span></label>
@@ -691,16 +691,23 @@
                 showToast("سلتك فارغة! يرجى إضافة منتجات أولاً", "error");
                 return;
             }
-            if (!name) {
-                showToast("يرجى كتابة الاسم بالكامل", "error");
+            
+            // التأكد من أن الاسم ثلاثي على الأقل (يحتوي على مسافتين بين الكلمات)
+            const nameParts = name.split(/\s+/);
+            if (nameParts.length < 3 || nameParts.some(part => part.length < 2)) {
+                showToast("يرجى كتابة الاسم ثلاثياً بالكامل لتسهيل عملية التوصيل", "error");
                 document.getElementById('cust-name').focus();
                 return;
             }
-            if (!phone || phone.length < 11) {
-                showToast("يرجى إدخال رقم تليفون صحيح مكون من 11 رقم", "error");
+            
+            // التأكد من رقم الهاتف (11 رقم دقيق ويبدأ بـ 01)
+            const phoneRegex = /^01[0125]\d{8}$/;
+            if (!phoneRegex.test(phone)) {
+                showToast("يرجى إدخال رقم تليفون صحيح مكون من 11 رقم ويبدأ بـ 01", "error");
                 document.getElementById('cust-phone').focus();
                 return;
             }
+            
             if (!addr) {
                 showToast("يرجى إدخال عنوان التوصيل بالتفصيل", "error");
                 document.getElementById('cust-addr').focus();
@@ -724,7 +731,8 @@
                 const item = cart[itemName];
                 const itemTotal = item.price * item.qty;
                 total += itemTotal;
-                message += `*${index}-* ${itemName} [الكمية: ${item.qty}] (${item.price} ج.م)\n`;
+                // عرض سعر القطعة والجمالي للكمية المطلوبة بوضوح تام لمنع الخلاف
+                message += `*${index}-* ${itemName} [الكمية: ${item.qty}] (سعر القطعة: ${item.price} ج.م | الإجمالي: ${itemTotal} ج.م)\n`;
                 index++;
             });
             
